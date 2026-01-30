@@ -1,15 +1,18 @@
 services:
   db:
-    image: postgres:16-alpine
+    image: mysql:8.0
     environment:
-      POSTGRES_USER: spw
-      POSTGRES_PASSWORD: spw_pg_password_change_me
-      POSTGRES_DB: spw
+      MYSQL_ROOT_PASSWORD: spw_mysql_root_password_change_me
+      MYSQL_DATABASE: spw
+      MYSQL_USER: spw
+      MYSQL_PASSWORD: spw_mysql_password_change_me
+    ports:
+      - "3306:3306"
     volumes:
-      - spw_pg_data:/var/lib/postgresql/data
+      - spw_mysql_data:/var/lib/mysql
       - ./server/db/init.sql:/docker-entrypoint-initdb.d/001-init.sql:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U spw -d spw"]
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -19,7 +22,7 @@ services:
       context: ./server
     environment:
       PORT: 3000
-      DATABASE_URL: postgres://spw:spw_pg_password_change_me@db:5432/spw
+      DATABASE_URL: mysql://spw:spw_mysql_password_change_me@db:3306/spw
       JWT_SECRET: spw_jwt_secret_change_me
     depends_on:
       db:
@@ -34,4 +37,5 @@ services:
       - "80:80"
 
 volumes:
-  spw_pg_data:
+  spw_mysql_data:
+

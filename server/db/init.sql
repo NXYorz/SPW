@@ -1,54 +1,50 @@
 -- Users
-create table if not exists users (
-  id bigserial primary key,
-  username text not null unique,
-  password_hash text not null,
-  role text not null default 'user',
-  created_at timestamptz not null default now()
+CREATE TABLE IF NOT EXISTS users (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  username VARCHAR(64) NOT NULL UNIQUE,
+  password_hash VARCHAR(255) NOT NULL,
+  role VARCHAR(20) NOT NULL DEFAULT 'user',
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Plans
-create table if not exists plans (
-  id bigserial primary key,
-  user_id bigint not null references users(id) on delete cascade,
-  date text not null,
-  title text not null,
-  category text not null,
-  minutes int not null,
-  done boolean not null default false,
-  notes text,
-  public boolean not null default false,
-  created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
+CREATE TABLE IF NOT EXISTS plans (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  user_id BIGINT NOT NULL,
+  date VARCHAR(20) NOT NULL,
+  title VARCHAR(255) NOT NULL,
+  category VARCHAR(64) NOT NULL,
+  minutes INT NOT NULL,
+  done BOOLEAN NOT NULL DEFAULT FALSE,
+  notes TEXT,
+  public BOOLEAN NOT NULL DEFAULT FALSE,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
-create index if not exists idx_plans_user_date on plans(user_id, date);
-create index if not exists idx_plans_public_date on plans(public, date);
+CREATE INDEX idx_plans_user_date ON plans(user_id, date);
+CREATE INDEX idx_plans_public_date ON plans(public, date);
 
 -- Resources
-create table if not exists resources (
-  id bigserial primary key,
-  title text not null,
-  category text not null,
-  type text not null,
-  url text not null,
-  summary text not null,
-  tags text[] not null default '{}',
-  created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
+CREATE TABLE IF NOT EXISTS resources (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  title VARCHAR(255) NOT NULL,
+  category VARCHAR(64) NOT NULL,
+  type VARCHAR(32) NOT NULL,
+  url VARCHAR(512) NOT NULL,
+  summary TEXT NOT NULL,
+  tags JSON,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
-create index if not exists idx_resources_updated_at on resources(updated_at);
+CREATE INDEX idx_resources_updated_at ON resources(updated_at);
 
 -- seed admin account
-insert into users(username, password_hash, role)
-values (
+INSERT IGNORE INTO users(username, password_hash, role)
+VALUES (
   'admin',
   '$2a$10$BQlJpA08SWShMb.tcaxotuioe1dkYvUbbc2lOW2F.k0WMgUt0eXB2',
   'admin'
-)
-
-
-on conflict (username) do nothing;
-
--- password hash above corresponds to default password: spw-admin
+);
