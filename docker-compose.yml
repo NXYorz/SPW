@@ -1,0 +1,37 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: spw
+      POSTGRES_PASSWORD: spw_pg_password_change_me
+      POSTGRES_DB: spw
+    volumes:
+      - spw_pg_data:/var/lib/postgresql/data
+      - ./server/db/init.sql:/docker-entrypoint-initdb.d/001-init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U spw -d spw"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build:
+      context: ./server
+    environment:
+      PORT: 3000
+      DATABASE_URL: postgres://spw:spw_pg_password_change_me@db:5432/spw
+      JWT_SECRET: spw_jwt_secret_change_me
+    depends_on:
+      db:
+        condition: service_healthy
+
+  web:
+    build:
+      context: .
+    depends_on:
+      - api
+    ports:
+      - "80:80"
+
+volumes:
+  spw_pg_data:
