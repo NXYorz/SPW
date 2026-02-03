@@ -7,11 +7,11 @@ import { toISODate } from './lib/date';
 import { apiJson, getToken, setToken, toastError } from './lib/api';
 import type { PlanItem, ResourceItem, User } from './types';
 import { AuthDrawer } from './components/AuthDrawer';
-import { AdminTab } from './tabs/AdminTab.tsx';
 import { PlansTab } from './tabs/PlansTab.tsx';
 import { ResourcesTab } from './tabs/ResourcesTab.tsx';
+import { ProfileTab } from './tabs/ProfileTab.tsx';
 
-type TabKey = 'plans' | 'resources' | 'admin';
+type TabKey = 'plans' | 'resources' | 'profile';
 
 function App() {
   const [tab, setTab] = useState<TabKey>('plans');
@@ -104,17 +104,17 @@ function App() {
               学习资料
             </Button>
             <Button
-              theme={tab === 'admin' ? 'primary' : 'default'}
-              variant={tab === 'admin' ? 'base' : 'outline'}
+              theme={tab === 'profile' ? 'primary' : 'default'}
+              variant={tab === 'profile' ? 'base' : 'outline'}
               icon={<UserIcon />}
-              onClick={() => setTab('admin')}
+              onClick={() => setTab('profile')}
             >
-              管理员
+              个人资料
             </Button>
 
             <div className="ml-2 hidden h-8 w-px bg-slate-200 sm:block" />
 
-            <Badge count={isAdmin ? '管理员' : 0} showZero={false}>
+            <Badge count={isAdmin ? '管理' : 0} showZero={false}>
               <Button variant="outline" icon={<UserIcon />} onClick={() => setAuthOpen(true)}>
                 {currentUser ? currentUser.username : '登录/注册'}
               </Button>
@@ -138,8 +138,8 @@ function App() {
             <Tabs.TabPanel value="resources" label="学习资料">
               <ResourcesTab token={token} openAuth={() => setAuthOpen(true)} isAdmin={isAdmin} />
             </Tabs.TabPanel>
-            <Tabs.TabPanel value="admin" label="管理员">
-              <AdminTab currentUser={currentUser} openAuth={() => setAuthOpen(true)} />
+            <Tabs.TabPanel value="profile" label="个人资料">
+              <ProfileTab currentUser={currentUser} openAuth={() => setAuthOpen(true)} isAdmin={isAdmin} />
             </Tabs.TabPanel>
           </Tabs>
         </div>

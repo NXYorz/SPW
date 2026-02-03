@@ -1,41 +1,70 @@
-import { useState } from 'react';
-
+import {AdminTab} from './AdminTab'
+import { useState,useEffect } from 'react';
 import { Button, Card, Divider, Input, MessagePlugin, Typography } from 'tdesign-react';
 import { SettingIcon } from 'tdesign-icons-react';
 import type { User } from '../types';
 import { apiJson, toastError } from '../lib/api';
 
-export function AdminTab(props: {
+export function ProfileTab(props: {
   currentUser: User | null;
   openAuth: () => void;
+  isAdmin: Boolean;
 }) {
-  const { currentUser, openAuth } = props;
-  const isAdmin = currentUser?.role === 'admin';
+    if(props.isAdmin)
+        return AdminTab({currentUser:props.currentUser,openAuth:props.openAuth});
 
-  const [oldPassword, setOldPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
+    const [oldPassword , setOldPassword] = useState('');
+    const [newPassword , setNewPassword] = useState('');
+    const { currentUser, openAuth } = props;
+    const [useDays , setUseDays] = useState(0); 
 
-  function changePassword() {
-    apiJson<{ ok: true }>('/api/users/me/password', {
-      method: 'PATCH',
-      body: { oldPassword, newPassword },
-      auth: true,
-    })
-      .then(() => {
-        setOldPassword('');
-        setNewPassword('');
-        MessagePlugin.success('密码已更新（云端生效）');
+    
+    function changePassword() {
+      apiJson<{ok:true}>('/api/users/me/password',{
+        method:'PATCH',
+        body:{oldPassword,newPassword},
+        auth:true
       })
-      .catch((e) => toastError(e, '修改密码失败'));
-  }
+        .then(()=>{
+          setOldPassword('');
+          setNewPassword('');
+          MessagePlugin.success('密码已更新（云端生效）');
+        })
+        .catch((e)=>toastError(e,'修改密码失败'));
+    }
 
-  return (
+    async function clacDays(user:User) : Promise<number> {
+      try {
+        const r = await apiJson<{days:number}>('/api/users/me/days',{
+          method:'GET',
+          auth:true
+        })
+        return r.days;
+      } catch(e) {
+        toastError(e,'获取天数失败');
+        return 0;
+      }
+      return 0;
+    }
+
+    useEffect(()=>{
+      const getUseDays = async ()=>{
+        if(!currentUser)
+            return;
+        const days = await clacDays(currentUser);
+        setUseDays(days);
+      };
+      getUseDays();
+    },[currentUser]);
+    
+
+    return (
     <div className="space-y-4">
       <Card bordered>
         <Typography.Title level="h4" className="!mb-1">
-          管理员中心
+          用户中心
         </Typography.Title>
-        <Typography.Text className="text-slate-600">用于维护学习资料库与全站数据（云端同步）。</Typography.Text>
+        <Typography.Text className="text-slate-600">{currentUser ? `您已使用该网站 ${useDays} 天。` : "用于维护学习资料库与全站数据（云端同步）。"}</Typography.Text>
 
         <Divider className="!my-4" />
 
@@ -46,20 +75,10 @@ export function AdminTab(props: {
               登录 / 注册
             </Button>
           </div>
-        ) : !isAdmin ? (
-          <div className="space-y-3">
-            <Typography.Text className="text-slate-700">
-              当前账号：<span className="font-semibold">{currentUser.username}</span>（普通用户）。
-            </Typography.Text>
-            <Typography.Text className="text-slate-600">普通用户无法维护资料条目。</Typography.Text>
-            <Button variant="outline" onClick={openAuth}>
-              切换账号
-            </Button>
-          </div>
         ) : (
           <div className="space-y-3">
             <Typography.Text className="text-slate-700">
-              你已使用管理员账号 <span className="font-semibold">{currentUser.username}</span> 登录。
+              你已使用普通账号 <span className="font-semibold">{currentUser.username}</span> 登录。
             </Typography.Text>
 
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
