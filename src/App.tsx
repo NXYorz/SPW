@@ -139,7 +139,7 @@ function App() {
               <ResourcesTab token={token} openAuth={() => setAuthOpen(true)} isAdmin={isAdmin} />
             </Tabs.TabPanel>
             <Tabs.TabPanel value="profile" label="个人资料">
-              <ProfileTab currentUsers={currentUser} openAuth={() => setAuthOpen(true)} isAdmin={isAdmin} />
+              <ProfileTab currentUser={currentUser} openAuth={() => setAuthOpen(true)} isAdmin={isAdmin} />
             </Tabs.TabPanel>
           </Tabs>
         </div>
