@@ -10,14 +10,12 @@ export function ProfileTab(props: {
   openAuth: () => void;
   isAdmin: Boolean;
 }) {
-    if(props.isAdmin)
-        return AdminTab({currentUser:props.currentUser,openAuth:props.openAuth});
+    
 
     const [oldPassword , setOldPassword] = useState('');
     const [newPassword , setNewPassword] = useState('');
-    const { currentUser, openAuth } = props;
+    const { currentUser, openAuth ,isAdmin} = props;
     const [useDays , setUseDays] = useState(0); 
-
     
     function changePassword() {
       apiJson<{ok:true}>('/api/users/me/password',{
@@ -57,6 +55,8 @@ export function ProfileTab(props: {
       getUseDays();
     },[currentUser]);
     
+    if(props.isAdmin)
+      return  <AdminTab currentUser={currentUser} openAuth={openAuth} />;
 
     return (
     <div className="space-y-4">
