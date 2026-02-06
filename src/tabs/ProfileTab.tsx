@@ -6,18 +6,17 @@ import type { User } from '../types';
 import { apiJson, toastError } from '../lib/api';
 
 export function ProfileTab(props: {
-  currentUser: User | null;
+  currentUsers: User | null;
   openAuth: () => void;
   isAdmin: Boolean;
 }) {
-    if(props.isAdmin)
-        return AdminTab({currentUser:props.currentUser,openAuth:props.openAuth});
+    
 
     const [oldPassword , setOldPassword] = useState('');
     const [newPassword , setNewPassword] = useState('');
-    const { currentUser, openAuth } = props;
+    const { currentUsers, openAuth ,isAdmin} = props;
     const [useDays , setUseDays] = useState(0); 
-
+    const [currentUser, setCurrentUser] = useState<User | null>(currentUsers);
     
     function changePassword() {
       apiJson<{ok:true}>('/api/users/me/password',{
@@ -57,6 +56,8 @@ export function ProfileTab(props: {
       getUseDays();
     },[currentUser]);
     
+    if(props.isAdmin)
+      return AdminTab({currentUser,openAuth});
 
     return (
     <div className="space-y-4">
