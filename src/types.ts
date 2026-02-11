@@ -8,7 +8,7 @@ export interface User {
   id: number;
   username: string;
   role: UserRole;
-  created_at?: string;
+  created_at?: Date;
 }
 
 export interface PlanItem {

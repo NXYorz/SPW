@@ -267,7 +267,7 @@ export function ResourcesTab(props: {
 
           <div>
             <Typography.Text className="mb-2 block text-slate-600">摘要（建议写清楚：学什么/适合谁/建议怎么学）</Typography.Text>
-            <Textarea value={draftSummary} onChange={(v) => setDraftSummary(String(v))} autosize />
+            <Textarea value={draftSummary} onChange={(v) => setDraftSummary(String(v))} rows={1} autosize />
           </div>
 
           <div>

@@ -28,6 +28,16 @@ const registerSchema = z.object({
   password: z.string().min(6).max(72),
 });
 
+app.get('/api/users/me/days', authMiddleware, async (req, res) => {
+  const userId = req.user.sub;
+  const [rows] = await pool.query(
+    'select datediff(now() , users.created_at) as day from users where id = ?',
+    [userId]
+  )
+  const days = rows[0].day;
+  res.json({ days });
+});
+
 app.post('/api/auth/register', async (req, res) => {
   const parsed = registerSchema.safeParse(req.body);
   if (!parsed.success) {
@@ -46,7 +56,7 @@ app.post('/api/auth/register', async (req, res) => {
 
   const passwordHash = await bcrypt.hash(password, 10);
   const [result] = await pool.query(
-    'insert into users(username, password_hash, role) values (?, ?, ?)',
+    'insert into users(username, password_hash, role,created_at) values (?, ?, ?,now())',
     [normalized, passwordHash, 'user'],
   );
 
